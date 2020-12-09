@@ -126,7 +126,7 @@ char *strchr(char *s, int c);
 ```
 
 ```C
-const char cdizi[] = "Bilgisayar";
+ const char cdizi[] = "Bilgisayar";
  char *ret;
  let = strchr(cdizi, 's');
  printf("Bulunan karakterden itibaren dizi içeriği: %s", ret);
@@ -134,3 +134,32 @@ const char cdizi[] = "Bilgisayar";
 Çıktı:
 
 *Bulunan karakterden itibaren dizi içeriği: sayar*
+
+
+### strtok()
+- stringi parçalara ayırmak için kullanılır
+
+```C
+char *strtok(char *str, const char *delim)
+```
+
+```C
+ char str[80] = "saü bilgisayar mühendisliği";
+ const char s[2] = " ";
+ char *token;
+
+  token = strtok(str, s);
+   
+  while( token != NULL ) {
+      printf( " %s\n", token );
+    
+      token = strtok(NULL, s);
+   }
+```
+Çıktı:
+
+*saü*
+
+*bilgisayar*
+
+*mühendisliği*
