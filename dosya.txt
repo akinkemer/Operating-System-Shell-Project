@@ -1,3 +1,3 @@
-a merhaba ben akin
-b ne olur calis
-c komut denemesi ls-l; mahvetme;
+komut denemesi
+a b c d 
+ls; ls-l; cat;
