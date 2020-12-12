@@ -9,13 +9,19 @@ INPUT new_inputstruct(char *filename)
         return NULL;
     }
     INPUT input=(INPUT)malloc(sizeof(struct input));
-    input->fields=0;
+    input->NF=0;
     input->line[MAXLEN-1]='\0';
     return input;
     
 }
-int get_line(INPUT input)
+int get_line(INPUT in)
 {
+    in->NF=0;
+
+    if(fgets(in->line,MAXLEN-1,in->file)){
+        in->NF=-1;
+        return -1;
+    }
 }
 void free_inputstruct(INPUT input)
 {
