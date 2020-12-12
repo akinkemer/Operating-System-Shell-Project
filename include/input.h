@@ -1,15 +1,17 @@
-#ifndef INPUT
-#define INPUT
+#ifndef INPUT_
+#define INPUT_
 
-typedef struct input{
-  char *name;               /* File name */
-  FILE *f;                  /* File descriptor */
-  int line;                 /* Line number */
-  char text1[MAXLEN];       /* The line */
-  char text2[MAXLEN];       /* Working -- contains fields */
-  int NF;                   /* Number of fields */
-  char *fields[MAXFIELDS];  /* Pointers to fields */
-  int file;                 /* 1 for file, 0 for popen */
-}*INPUT;
+#include <stdio.h>
+#define MAXLEN 513
+
+ typedef struct input{
+   FILE *file;
+   int fields;
+   char line[MAXLEN];
+ } *INPUT;
+
+ extern INPUT new_inputstruct();
+ extern int get_line();
+ extern void free_inputstruct();
 
 #endif
