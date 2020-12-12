@@ -1,5 +1,5 @@
-#ifndef INPUT_
-#define INPUT_
+#ifndef FILE_INPUT
+#define FILE_INPUT
 
 #include <stdio.h>
 #define MAXLEN 513
