@@ -6,9 +6,11 @@
 int main(int argc, char **argv)
 {
   char input[512];
+  printf("prompt> ");
   while (strncmp(input, "quit", 4) != 0)
   {
-    printf("prompt>");
+    fgets(input,512,stdin);
+    printf("prompt> ");
   }
 
 
