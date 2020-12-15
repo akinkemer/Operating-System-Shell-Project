@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#define MAXCOMMAND 64
+#define MAXCOMMANDS 64
 #define MAXPARAMETERS 3
 
 void parseToCommands(char *line, char **argv)
@@ -66,8 +66,9 @@ int main(int argc, char **argv)
   int i = 0;
   int numberOfArgs;
   char line[512];
-  char *argvCommands[MAXCOMMAND + 1];
+  char *argvCommands[MAXCOMMANDS + 1];
   char *argvParameters[MAXPARAMETERS];
+  char **executingCommands;
 
   while (1)
   {
@@ -89,6 +90,7 @@ int main(int argc, char **argv)
       numberOfArgs++;
     }
     int i;
+    int j;
     for (i = 0; i < numberOfArgs; i++)
     {
       parseToParameters(argvCommands[i], argvParameters);
