@@ -8,15 +8,31 @@
 #define MAXCOMMAND 64
 #define MAXPARAMETERS 3
 
-void parse(char *line, char **argv,const char* ch)
+void parseToCommands(char *line, char **argv)
 {
   int i = 0;
-  char *token;
-  char *rest = line;
+  const char *token;
+  char *rest = strdup(line);
 
-  while ((token = strtok_r(rest, ch, &rest)))
+  while ((token = strtok_r(rest, ";", &rest)))
   {
-    strcpy(argv[i++], token);
+    argv[i] = strdup(token);
+    i++;
+  }
+  argv[i] = "eof";
+}
+void parseToParameters(char *line, char **argv)
+{
+  int i = 0;
+  const char *token;
+  char *rest = strdup(line);
+  while ((token = strtok_r(rest, " ", &rest)))
+  {
+    argv[i] = strdup(token);
+    i++;
+  }
+  for(i;i<MAXPARAMETERS;i++){
+    argv[i]=NULL;
   }
 }
 void execute(char **argv)
@@ -26,14 +42,14 @@ void execute(char **argv)
 
   if ((pid = fork()) < 0)
   {
-    printf("ERROR: forking child process failed\n");
+    perror("ERROR:");
     exit(1);
   }
   else if (pid == 0)
   {
     if (execvp(*argv, argv) < 0)
     {
-      printf("ERROR: exec failed\n");
+      perror("ERROR:");
       exit(1);
     }
   }
@@ -47,9 +63,11 @@ void execute(char **argv)
 
 int main(int argc, char **argv)
 {
+  int i = 0;
+  int numberOfArgs;
   char line[512];
-  char *argvCommands[MAXCOMMAND+1];
-  char *argvParameters[MAXPARAMETERS+1];
+  char *argvCommands[MAXCOMMAND + 1];
+  char *argvParameters[MAXPARAMETERS];
 
   while (1)
   {
@@ -60,11 +78,22 @@ int main(int argc, char **argv)
 
     printf("\n");
 
-    parse(line, argvCommands,";");
+    parseToCommands(line, argvCommands);
 
     if (strcmp(argvCommands[0], "quit") == 0)
     {
       exit(0);
     }
+    while (strcmp(argvCommands[numberOfArgs], "eof") != 0)
+    {
+      numberOfArgs++;
+    }
+    int i;
+    for (i = 0; i < numberOfArgs; i++)
+    {
+      parseToParameters(argvCommands[i], argvParameters);
+      execute(argvParameters);
+    }
+    numberOfArgs = 0;
   }
 }
