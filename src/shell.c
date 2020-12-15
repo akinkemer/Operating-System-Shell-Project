@@ -5,98 +5,66 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#define MAXCOMMAND 64
+#define MAXPARAMETERS 3
 
-#define MAXCMD 64
-
-void parseToParameters(char *line, char **argv)
+void parse(char *line, char **argv,const char* ch)
 {
-  const char s[2] = " ";
   int i = 0;
-  *argv = NULL;
   char *token;
+  char *rest = line;
 
-  token = strtok(line, s);
-
-  while (token != NULL)
+  while ((token = strtok_r(rest, ch, &rest)))
   {
-    argv[i] = token;
-    token = strtok(NULL, s);
-    i++;
-  }
-  for(i;i<3;i++){
-    argv[i]=NULL;
+    strcpy(argv[i++], token);
   }
 }
-void parseToCommands(char *line, char **argv)
-{
-  const char s[2] = ";";
-  int i = 0;
-  *argv = NULL;
-  char *token;
-
-  token = strtok(line, s);
-
-  while (token != NULL)
-  {
-    argv[i] = token;
-    token = strtok(NULL, s);
-    i++;
-  }
-  for (i; i < MAXCMD; i++)
-  {
-    argv[i] = NULL;
-  }
-}
-
 void execute(char **argv)
 {
   pid_t pid;
   int status;
 
   if ((pid = fork()) < 0)
-  { /* fork a child process           */
-    printf("*** ERROR: forking child process failed\n");
+  {
+    printf("ERROR: forking child process failed\n");
     exit(1);
   }
   else if (pid == 0)
-  { /* for the child process:         */
+  {
     if (execvp(*argv, argv) < 0)
-    { /* execute the command  */
-      printf("*** ERROR: exec failed\n");
+    {
+      printf("ERROR: exec failed\n");
       exit(1);
     }
   }
   else
-  {                              /* for the parent:      */
-    while (wait(&status) != pid) /* wait for completion  */
-      ;
+  {
+    while (wait(&status) != pid)
+    {
+    };
   }
 }
 
-void main(void)
+int main(int argc, char **argv)
 {
   char line[512];
-  char *argvCommands[MAXCMD];
-  char *argvParameters[3];
+  char *argvCommands[MAXCOMMAND+1];
+  char *argvParameters[MAXPARAMETERS+1];
 
   while (1)
   {
     printf("prompt> ");
     fgets(line, 512, stdin);
+
+    line[strlen(line) - 1] = '\0';
+
     printf("\n");
-    parseToCommands(line, argvCommands);
+
+    parse(line, argvCommands,";");
+
     if (strcmp(argvCommands[0], "quit") == 0)
     {
       exit(0);
     }
-
-    int i;
-    for(i=0;i<MAXCMD;i++){
-      if(argvCommands[i]!=NULL){
-        parseToParameters(argvCommands[i],argvParameters);
-        execute(argvParameters);
-      }
-    }
-    
   }
 }
