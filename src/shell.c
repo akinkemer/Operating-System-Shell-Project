@@ -105,7 +105,7 @@ void runShellMode()
 {
   while (1)
   {
-    printf("prompt> ");
+    printf("prompt>");
     if(fgets(line, MAX_CHARACTER, stdin)==NULL){
       exit(EXIT_SUCCESS);
     }
@@ -147,7 +147,6 @@ int main(int argc, char **argv)
     else
     {
       runBatchMode(file);
-      //exit(EXIT_SUCCESS);
     }
   }
   else if (argc == 1)
@@ -156,7 +155,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    puts("ERROR: for using batch mode [$shell fileName.txt]");
-    puts("for using batch mode [$shell fileName.txt]");
+    fprintf(stderr,"\e[31m ERROR: for using batch mode [$shell fileName.txt]\n");
+    fprintf(stderr,"\e[31m ERROR: for using batch mode [$shell fileName.txt] \e[0m \n");
   }
 }
