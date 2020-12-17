@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-
+//512 karakterden fazlasında uyarı ver.uyarılar anlaşılır olsun.hatalı komutta uyarı
 #define MAX_CHARACTER 512 /* Bir satirdaki max karakter sayisi*/
-#define MAX_COMMANDS 64   /* Bir satirdan okunacak max komut sayisi*/
+#define MAX_COMMANDS (MAX_CHARACTER/3)   /* Bir satirdan okunacak max komut sayisi*/
 #define MAX_PARAMETERS 3  /* Bir komutun max parametre sayisi*/
 
 char line[MAX_CHARACTER];
@@ -17,35 +17,34 @@ int numberOfArgs;
 /*
 Komut satirindan alinan parametreler ';' ile ayriliyor.
 */
-void parseToCommands(char *line, char **parsedCommands)
+void parseToCommands(char *lineFromInput, char **parsedCommands)
 {
   int i = 0;
   const char *token;
-  char *toBeParsedLine = strdup(line);
+  char *toBeParsedLine = strdup(lineFromInput);
+
   while ((token = strtok_r(toBeParsedLine, ";", &toBeParsedLine)))
   {
-    parsedCommands[i] = strdup(token);
-    i++;
+    parsedCommands[i++] = strdup(token);
   }
-  parsedCommands[i] = "eof"; /* Daha sonra dolu indeks sayisini hesaplamak icin
-   dolu indekslerden sonraki indekse eof degeri ataniyor */
+  parsedCommands[i] = "end"; /* Daha sonra dolu indeks sayisini hesaplamak icin
+   dolu indekslerden sonraki indekse end degeri ataniyor */
 }
 
 /* Ayristirilan komutlar ' ' karakteri ile parametrelerine ayriliyor.*/
-void parseToParameters(char *line, char **parsedCommands)
+void parseToParameters(char *lineFromInput, char **parsedCommands)
 {
-  int i= 0;
+  int i = 0;
   int j;
   const char *token;
-  char *toBeParsedCommands = strdup(line);
+  char *toBeParsedCommands = strdup(lineFromInput);
   while ((token = strtok_r(toBeParsedCommands, " ", &toBeParsedCommands)))
   {
-    parsedCommands[i] = strdup(token);
-    i++;
+    parsedCommands[i++] = strdup(token);
   }
   /* execvp() NULL olmayan ve bos olan parametre gecildiginde hata veriyor.
   Bu hatayi onlemek icin bos indekslere NULL degeri ataniyor*/
-  for (j=i; j < MAX_PARAMETERS; j++)
+  for (j = i; j < MAX_PARAMETERS; j++)
   {
     parsedCommands[j] = NULL;
   }
@@ -57,14 +56,16 @@ void executeCommands(char **commands)
 
   if ((process_id = fork()) < 0)
   {
-    perror("ERROR:");
+    perror("\e[31mERROR");
+    printf("\e[0m");
     exit(1);
   }
   else if (process_id == 0)
   {
     if (execvp(*commands, commands) < 0)
     {
-      perror("ERROR:");
+      perror("\e[31mERROR");
+      printf("\e[0m");
       exit(1);
     }
   }
@@ -77,13 +78,13 @@ void executeCommands(char **commands)
 }
 void runBatchMode(FILE *file)
 {
-  while (fgets(line, MAX_CHARACTER, file)!=NULL)
+  while (fgets(line, MAX_CHARACTER, file) != NULL)
   {
     line[strlen(line) - 1] = '\0';
     puts(line);
     parseToCommands(line, argvCommands);
 
-    while (strcmp(argvCommands[numberOfArgs], "eof") != 0)
+    while (strcmp(argvCommands[numberOfArgs], "end") != 0)
     {
       numberOfArgs++;
     }
@@ -92,44 +93,62 @@ void runBatchMode(FILE *file)
     {
       if (strcmp(argvCommands[i], "quit") == 0)
       {
+        printf("\e[32m(quit komutu ile cikis yaptiniz)\e[0m\n");
+        fclose(file);
         exit(EXIT_SUCCESS);
       }
-      parseToParameters(argvCommands[i], argvParameters);
-      executeCommands(argvParameters);
+      if (strcmp(argvCommands[i], " ") == 0)
+      {
+        fprintf(stderr, "\e[31mUyari:bosluk karakteri gecersiz bir komuttur! \e[0m\n");
+      }
+      else
+      {
+        parseToParameters(argvCommands[i], argvParameters);
+        executeCommands(argvParameters);
+      }
     }
     numberOfArgs = 0;
   }
   fclose(file);
 }
-void runShellMode()
+void runInteractiveMode()
 {
   while (1)
   {
     printf("prompt>");
-    if(fgets(line, MAX_CHARACTER, stdin)==NULL){
+    if (fgets(line, MAX_CHARACTER, stdin) == NULL)
+    {
       exit(EXIT_SUCCESS);
     }
 
     line[strlen(line) - 1] = '\0';
 
-    printf("\n");
-
     parseToCommands(line, argvCommands);
 
-    if (strcmp(argvCommands[0], "quit") == 0)
-    {
-      exit(0);
-    }
-    while (strcmp(argvCommands[numberOfArgs], "eof") != 0)
+    while (strcmp(argvCommands[numberOfArgs], "end") != 0)
     {
       numberOfArgs++;
     }
     int i;
     for (i = 0; i < numberOfArgs; i++)
     {
-      parseToParameters(argvCommands[i], argvParameters);
-      executeCommands(argvParameters);
+      if (strcmp(argvCommands[i], "quit") == 0)
+      {
+        printf("\e[32m(Basariyla cikis yaptiniz)\e[0m\n");
+        exit(EXIT_SUCCESS);
+      }
+      if (strcmp(argvCommands[i], " ") == 0)
+      {
+        fprintf(stderr, "\e[31mUyari:bosluk karakteri gecersiz bir komuttur! \e[0m\n");
+      }
+      else
+      {
+        parseToParameters(argvCommands[i], argvParameters);
+        executeCommands(argvParameters);
+      }
     }
+
+    printf("\n");
     numberOfArgs = 0;
   }
 }
@@ -151,11 +170,11 @@ int main(int argc, char **argv)
   }
   else if (argc == 1)
   {
-    runShellMode();
+    runInteractiveMode();
   }
   else
   {
-    fprintf(stderr,"\e[31m ERROR: for using batch mode [$./bin/shell fileName.txt]\n");
-    fprintf(stderr,"\e[31m ERROR: for using shell mode [$./bin/shell ] \e[0m \n");
+    fprintf(stderr, "\e[31m ERROR: for using batch mode [$./bin/shell fileName.txt]\n");
+    fprintf(stderr, "\e[31m ERROR: for using interactive mode [$./bin/shell ] \e[0m \n");
   }
 }
