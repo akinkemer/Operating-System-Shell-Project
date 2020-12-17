@@ -34,7 +34,8 @@ void parseToCommands(char *line, char **parsedCommands)
 /* Ayristirilan komutlar ' ' karakteri ile parametrelerine ayriliyor.*/
 void parseToParameters(char *line, char **parsedCommands)
 {
-  int i = 0;
+  int i= 0;
+  int j;
   const char *token;
   char *toBeParsedCommands = strdup(line);
   while ((token = strtok_r(toBeParsedCommands, " ", &toBeParsedCommands)))
@@ -44,9 +45,9 @@ void parseToParameters(char *line, char **parsedCommands)
   }
   /* execvp() NULL olmayan ve bos olan parametre gecildiginde hata veriyor.
   Bu hatayi onlemek icin bos indekslere NULL degeri ataniyor*/
-  for (i; i < MAX_PARAMETERS; i++)
+  for (j=i; j < MAX_PARAMETERS; j++)
   {
-    parsedCommands[i] = NULL;
+    parsedCommands[j] = NULL;
   }
 }
 void executeCommands(char **commands)
@@ -76,9 +77,10 @@ void executeCommands(char **commands)
 }
 void runBatchMode(FILE *file)
 {
-  while (fgets(line, MAX_CHARACTER, stdin))
+  while (fgets(line, MAX_CHARACTER, file)!=NULL)
   {
     line[strlen(line) - 1] = '\0';
+    puts(line);
     parseToCommands(line, argvCommands);
 
     while (strcmp(argvCommands[numberOfArgs], "eof") != 0)
@@ -88,9 +90,9 @@ void runBatchMode(FILE *file)
     int i;
     for (i = 0; i < numberOfArgs; i++)
     {
-      if (strcmp(argvCommands[0], "quit") == 0)
+      if (strcmp(argvCommands[i], "quit") == 0)
       {
-        exit(0);
+        exit(EXIT_SUCCESS);
       }
       parseToParameters(argvCommands[i], argvParameters);
       executeCommands(argvParameters);
@@ -104,7 +106,9 @@ void runShellMode()
   while (1)
   {
     printf("prompt> ");
-    fgets(line, MAX_CHARACTER, stdin);
+    if(fgets(line, MAX_CHARACTER, stdin)==NULL){
+      exit(EXIT_SUCCESS);
+    }
 
     line[strlen(line) - 1] = '\0';
 
@@ -138,12 +142,12 @@ int main(int argc, char **argv)
     if ((file = fopen(argv[1], "r")) == NULL)
     {
       perror("FILE ERROR:");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
     else
     {
       runBatchMode(file);
-      exit(0);
+      //exit(EXIT_SUCCESS);
     }
   }
   else if (argc == 1)

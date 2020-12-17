@@ -1,4 +1,4 @@
-GCC=gcc -I ./include/ -o
+GCC=gcc -Wall -I ./include/ -o 
 
 all: compile
 compile:
