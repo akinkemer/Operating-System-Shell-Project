@@ -6,7 +6,7 @@
 #include <sys/types.h>
 //512 karakterden fazlasında uyarı ver.uyarılar anlaşılır olsun.hatalı komutta uyarı
 #define MAX_CHARACTER 512 /* Bir satirdaki max karakter sayisi*/
-#define MAX_COMMANDS (MAX_CHARACTER/3)   /* Bir satirdan okunacak max komut sayisi*/
+#define MAX_COMMANDS (MAX_CHARACTER+1/3)   /* Bir satirdan okunacak max komut sayisi*/
 #define MAX_PARAMETERS 3  /* Bir komutun max parametre sayisi*/
 
 char line[MAX_CHARACTER];
