@@ -155,7 +155,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    fprintf(stderr,"\e[31m ERROR: for using batch mode [$shell fileName.txt]\n");
-    fprintf(stderr,"\e[31m ERROR: for using batch mode [$shell fileName.txt] \e[0m \n");
+    fprintf(stderr,"\e[31m ERROR: for using batch mode [$./bin/shell fileName.txt]\n");
+    fprintf(stderr,"\e[31m ERROR: for using shell mode [$./bin/shell ] \e[0m \n");
   }
 }
