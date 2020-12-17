@@ -161,7 +161,8 @@ int main(int argc, char **argv)
   {
     if ((file = fopen(argv[1], "r")) == NULL)
     {
-      perror("FILE ERROR:");
+      perror("\e[31mFILE ERROR");
+      printf("\e[0m");
       exit(EXIT_FAILURE);
     }
     else
