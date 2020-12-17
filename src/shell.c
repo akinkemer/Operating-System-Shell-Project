@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-//512 karakterden fazlasında uyarı ver.uyarılar anlaşılır olsun.hatalı komutta uyarı
+/*512 karakterden fazla girisleri kontrol etme eksik*/
+/* strdup ile alinan hafiza geri iade edilmiyor*/
 #define MAX_CHARACTER 512 /* Bir satirdaki max karakter sayisi*/
 #define MAX_COMMANDS (MAX_CHARACTER+1/3)   /* Bir satirdan okunacak max komut sayisi*/
 #define MAX_PARAMETERS 3  /* Bir komutun max parametre sayisi*/
 
 char line[MAX_CHARACTER];
-char *argvCommands[MAX_COMMANDS + 1];
+char *argvCommands[MAX_COMMANDS + 1]; /* Dizinin sonu belli olsun diye fazladan end eklendigi icin +1*/
 char *argvParameters[MAX_PARAMETERS];
 int numberOfArgs;
 
