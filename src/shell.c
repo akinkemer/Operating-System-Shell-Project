@@ -6,6 +6,7 @@
 #include <sys/types.h>
 /*512 karakterden fazla girisleri kontrol etme eksik*/
 /* strdup ile alinan hafiza geri iade edilmiyor*/
+/* fgets null ise ctr d ile cikilmistir onu kullaniciya bildirme eksik*/
 #define MAX_CHARACTER 512 /* Bir satirdaki max karakter sayisi*/
 #define MAX_COMMANDS (MAX_CHARACTER+1/3)   /* Bir satirdan okunacak max komut sayisi*/
 #define MAX_PARAMETERS 3  /* Bir komutun max parametre sayisi*/
