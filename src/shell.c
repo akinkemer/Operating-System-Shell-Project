@@ -4,15 +4,13 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-/*512 karakterden fazla girisleri kontrol etme eksik*/
-/* strdup ile alinan hafiza geri iade edilmiyor*/
-/* fgets null ise ctr d ile cikilmistir onu kullaniciya bildirme eksik*/
-#define MAX_CHARACTER 512 /* Bir satirdaki max karakter sayisi*/
-#define MAX_COMMANDS (MAX_CHARACTER+1/3)   /* Bir satirdan okunacak max komut sayisi*/
-#define MAX_PARAMETERS 3  /* Bir komutun max parametre sayisi*/
 
-char line[MAX_CHARACTER];
-char *argvCommands[MAX_COMMANDS + 1]; /* Dizinin sonu belli olsun diye fazladan end eklendigi icin +1*/
+#define MAX_CHARACTER 512                /* Bir satirdaki max karakter sayisi*/
+#define MAX_COMMANDS (MAX_CHARACTER / 3) /* Bir satirdan okunacak max komut sayisi*/
+#define MAX_PARAMETERS 3                 /* Bir komutun max parametre sayisi*/
+
+char line[MAX_CHARACTER + 2];/*Fazla karakter girdisini kontrol etmek amacıyla fazladan okuma yapmak icin*/
+char *argvCommands[MAX_COMMANDS + 1];/*Dizinin sonunu belirlemek amacıyla fazladan indeks eklemek icin*/
 char *argvParameters[MAX_PARAMETERS];
 int numberOfArgs;
 
@@ -78,11 +76,37 @@ void executeCommands(char **commands)
     };
   }
 }
+void freeAllocatedMemories(){
+  int i;
+  for(i=0;i<MAX_COMMANDS+1;i++){
+    if(argvCommands[i]==NULL){
+      free(argvCommands[i]);
+    }
+  }
+  for(i=0;i<MAX_PARAMETERS;i++){
+    if(argvParameters[i]==NULL){
+      free(argvParameters[i]);
+    }
+  }
+
+
+}
 void runBatchMode(FILE *file)
 {
-  while (fgets(line, MAX_CHARACTER, file) != NULL)
+  while (fgets(line, MAX_CHARACTER + 2, file) != NULL)
   {
-    line[strlen(line) - 1] = '\0';
+    if (strlen(line) > MAX_CHARACTER)
+    {
+      fprintf(stderr,
+              "\e[31m(Girilen karakter sayisi %d'yi asiyor. Fazla karakterler isleme alinmayacaktir)\e[0m\n",
+              MAX_CHARACTER);
+      line[MAX_CHARACTER - 1] = '\0';
+    }
+    else
+    {
+      line[strlen(line) - 1] = '\0';
+    }
+
     puts(line);
     parseToCommands(line, argvCommands);
 
@@ -97,6 +121,7 @@ void runBatchMode(FILE *file)
       {
         printf("\e[32m(quit komutu ile cikis yaptiniz)\e[0m\n");
         fclose(file);
+        freeAllocatedMemories();
         exit(EXIT_SUCCESS);
       }
       if (strcmp(argvCommands[i], " ") == 0)
@@ -111,6 +136,7 @@ void runBatchMode(FILE *file)
     }
     numberOfArgs = 0;
   }
+  freeAllocatedMemories();
   fclose(file);
 }
 void runInteractiveMode()
@@ -118,12 +144,23 @@ void runInteractiveMode()
   while (1)
   {
     printf("prompt>");
-    if (fgets(line, MAX_CHARACTER, stdin) == NULL)
+    if (fgets(line, MAX_CHARACTER + 2, stdin) == NULL)
     {
+      printf("\e[32m(Ctrl-D ile cikis yaptiniz)\e[0m\n");
+      freeAllocatedMemories();
       exit(EXIT_SUCCESS);
     }
-
-    line[strlen(line) - 1] = '\0';
+    if (strlen(line) > MAX_CHARACTER)
+    {
+      fprintf(stderr,
+              "\e[31m(Girilen karakter sayisi %d'yi asiyor. Fazla karakterler isleme alinmayacaktir)\e[0m",
+              MAX_CHARACTER);
+      line[MAX_CHARACTER - 1] = '\0';
+    }
+    else
+    {
+      line[strlen(line) - 1] = '\0';
+    }
 
     parseToCommands(line, argvCommands);
 
@@ -137,6 +174,7 @@ void runInteractiveMode()
       if (strcmp(argvCommands[i], "quit") == 0)
       {
         printf("\e[32m(Basariyla cikis yaptiniz)\e[0m\n");
+        freeAllocatedMemories();
         exit(EXIT_SUCCESS);
       }
       if (strcmp(argvCommands[i], " ") == 0)
@@ -164,6 +202,7 @@ int main(int argc, char **argv)
     {
       perror("\e[31mFILE ERROR");
       printf("\e[0m");
+      freeAllocatedMemories();
       exit(EXIT_FAILURE);
     }
     else
@@ -177,7 +216,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    fprintf(stderr, "\e[31m ERROR: for using batch mode [$./bin/shell fileName.txt]\n");
-    fprintf(stderr, "\e[31m ERROR: for using interactive mode [$./bin/shell ] \e[0m \n");
+    fprintf(stderr, "\e[31mERROR: for using batch mode \e[33m[$./bin/shell fileName]\e[0m\n");
+    fprintf(stderr, "\e[31mERROR: for using interactive mode \e[33m[$./bin/shell ] \e[0m \n");
   }
 }
