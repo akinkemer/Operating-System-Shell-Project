@@ -31,7 +31,7 @@ void parseToCommands(char *lineFromInput, char **parsedCommands)
    dolu indekslerden sonraki indekse end degeri ataniyor */
 }
 
-/* Ayristirilan komutlar ' ' karakteri ile parametrelerine ayriliyor.*/
+/* Ayristirilan komutlar bosluk karakteri ile parametrelerine ayriliyor.*/
 void parseToParameters(char *lineFromInput, char **parsedCommands)
 {
   int i = 0;
@@ -42,7 +42,7 @@ void parseToParameters(char *lineFromInput, char **parsedCommands)
   {
     parsedCommands[i++] = strdup(token);
   }
-  /* execvp() NULL olmayan ve bos olan parametre gecildiginde hata veriyor.
+  /* execvp() NULL olmayan ve bos olan parametre gecildiginde hata verir.
   Bu hatayi onlemek icin bos indekslere NULL degeri ataniyor*/
   for (j = i; j < MAX_PARAMETERS; j++)
   {
