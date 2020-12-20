@@ -20,7 +20,3 @@ TASARIMA GENEL BAKIŞ
   Birden fazla komut girişi için olan ";" işareti için pointer yardımıyla ";" gördüğümüz yerde komutları bir diziye aktararak komutların beraber çalışma özel durumu sağlamaya çalıştık. Ve aslında komutları boşluk ve virgüllere göre bölmüş olduk.
   Komut yok komut yürütülemez, dosya açılamıyor kontrollerini sağladık, kabuk entere basılma, fazladan boşluk, ctrl-d gibi işlevler ile çalışıyor.
   Komutun birden fazla kelimeli argümanlarını dizi ve fonksiyonlarla gerçekleştirdik.
-  
-BİLİNEN HATALAR VEYA SORUNLAR
-
-  Komutların ";" işareti ile birden fazla girilmesini sağladık ama komutlar paralel olarak process olmuyor, sırayla oluyor.
